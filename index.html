@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UCH LAN Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav id="main-nav">
+    <button onclick="UCH.UI.showScreen('setup')">Setup</button>
+    <button onclick="UCH.UI.showScreen('heats')" id="nav-heats" disabled>Heats</button>
+    <button onclick="UCH.UI.showScreen('standings')" id="nav-standings" disabled>Standings</button>
+    <button onclick="UCH.UI.toggleBigScreen()">Big Screen</button>
+    <button onclick="UCH.UI.showScreen('final')" id="nav-final" disabled>Final</button>
+    <div class="spacer"></div>
+    <button onclick="UCH.UI.exportData()">Export</button>
+    <button onclick="document.getElementById('import-file').click()">Import</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="UCH.UI.importData(event)">
+    <button class="danger" onclick="UCH.UI.resetTournament()">Reset</button>
+  </nav>
+
+  <main id="app">
+    <button id="exit-big-screen" class="primary" onclick="UCH.UI.toggleBigScreen()" style="display:none; position:fixed; top:20px; right:20px; z-index:9999;">Exit Big Screen</button>
+    <!-- Setup Screen -->
+    <section id="screen-setup" class="screen active">
+      <h1>Tournament Setup</h1>
+      <div class="setup-grid">
+        <div class="card">
+          <h2>Players</h2>
+          <div class="input-group">
+            <input type="text" id="new-player" placeholder="Player name (or paste list)" onkeypress="if(event.key==='Enter') UCH.UI.addPlayer()">
+            <button onclick="UCH.UI.addPlayer()">Add</button>
+          </div>
+          <p id="setup-error" class="error"></p>
+          <ul id="player-list"></ul>
+        </div>
+        <div class="card">
+          <h2>Settings</h2>
+          <label>Total Heats: <input type="number" id="setting-heats" value="4" min="1"></label>
+          <label>Final Heat Size: <input type="number" id="setting-final" value="4" min="2"></label>
+          <label>Points (1st, 2nd, 3rd, 4th): <input type="text" id="setting-points" value="3,2,1,0"></label>
+          <button id="start-btn" class="primary large" onclick="UCH.UI.startTournament()">Start Tournament</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Heats Screen -->
+    <section id="screen-heats" class="screen">
+      <header class="heat-header">
+        <h1 id="heat-title">Heat X</h1>
+        <div class="heat-actions">
+          <button onclick="UCH.UI.prevHeat()" id="btn-prev-heat">&larr; Previous Heat</button>
+          <button onclick="UCH.UI.nextHeat()" id="btn-next-heat">Next Heat &rarr;</button>
+          <button onclick="UCH.UI.rerollCurrentHeat()" id="btn-reroll">Reroll Lobbies</button>
+        </div>
+      </header>
+      <div id="heat-pods" class="pods-container"></div>
+      <div id="heat-sitouts" class="sitouts-container"></div>
+      <p id="heat-error" class="error"></p>
+      <button id="btn-save-heat" class="primary large" onclick="UCH.UI.saveHeat()">Save & Next Heat</button>
+    </section>
+
+    <!-- Standings Screen -->
+    <section id="screen-standings" class="screen">
+      <h1>Standings</h1>
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>Rank</th><th>Player</th><th>Total Pts</th><th>Lobby Wins</th><th class="hide-on-big">History</th>
+          </tr>
+        </thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </section>
+
+    <!-- Final Screen -->
+    <section id="screen-final" class="screen">
+      <h1>Grand Final</h1>
+      <div id="final-tie-resolver" style="display:none;" class="card warning">
+        <h3>Tie at Cutoff</h3>
+        <p>Select the players advancing to the final:</p>
+        <div id="tie-candidates"></div>
+        <button onclick="UCH.UI.resolveFinalTie()">Confirm Finalists</button>
+      </div>
+      <div id="final-pod-container"></div>
+    </section>
+  </main>
+
+  <script>window.UCH = {};</script>
+  <script src="js/state.js"></script>
+  <script src="js/pods.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
