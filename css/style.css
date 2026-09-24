@@ -14,6 +14,12 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 button.large { padding: 12px 24px; font-size: 1.2rem; width: 100%; margin-top: 10px; }
 input { background: #000; color: white; border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-size: 1rem; }
 .error { color: #ff5252; font-weight: bold; }
+.hint { color: #9e9e9e; font-size: 0.9rem; margin: -5px 0 15px; }
+select, input:disabled { font-size: 1rem; }
+.card select { background: #000; color: white; border: 1px solid var(--border); padding: 8px; border-radius: 4px; }
+.dropped { opacity: 0.5; }
+.champion-banner { text-align: center; font-size: 2.5rem; font-weight: bold; color: #ffb300; padding: 20px; margin-bottom: 20px; border: 3px solid #ffb300; border-radius: 12px; }
+.champion-sub { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.2em; }
 .warning { border-left: 4px solid #ffb300; }
 
 #main-nav { display: flex; gap: 10px; background: var(--card); padding: 10px 20px; border-bottom: 1px solid var(--border); }
@@ -40,73 +46,109 @@ input { background: #000; color: white; border: 1px solid var(--border); padding
 .standings-table th, .standings-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
 .standings-table th { background: var(--card); color: var(--primary); }
 
-/* Big Screen Mode */
+/* Big Screen Mode
+   Tuned for a 1024x768 (4:3) projector (Dell 3400MP). Everything is sized from the viewport so it
+   fits without scrolling: lobbies scale with the number of lobby rows, standings with player count. */
 body.big-screen { background: #FAF3E0; color: #2C1E16; font-family: "Arial Black", "Impact", sans-serif; }
 body.big-screen #main-nav { display: none; }
 body.big-screen #exit-big-screen { display: none !important; /* Hide to prevent clutter, use OS close */ }
 
 /* Big Screen Layout */
-body.big-screen #app { 
-  max-width: 100%; 
-  padding: 30px; 
+body.big-screen #app {
+  max-width: 100%;
+  padding: 2.5vh 2vw;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 2.5vw;
   height: 100vh;
   overflow: hidden;
 }
 
 body.big-screen .screen { display: none !important; }
-body.big-screen #screen-standings { display: block !important; height: 100%; }
-body.big-screen #screen-heats { display: block !important; height: 100%; }
+body.big-screen #screen-standings { display: block !important; height: 100%; min-width: 0; }
+body.big-screen #screen-heats { display: block !important; height: 100%; min-width: 0; }
 
 /* Final Mode Override */
 body.big-screen.show-final #screen-heats { display: none !important; }
-body.big-screen.show-final #screen-final { display: block !important; height: 100%; }
+body.big-screen.show-final #screen-final { display: block !important; height: 100%; min-width: 0; }
 
 /* UCH Light Theme & Scaling */
-body.big-screen .card, 
-body.big-screen .pod-card { 
-  background: #FFF; 
-  border: 4px solid #D35400; 
-  border-radius: 12px;
-  box-shadow: 4px 4px 0 #2C1E16;
+body.big-screen .card,
+body.big-screen .pod-card {
+  background: #FFF;
+  border: 3px solid #D35400;
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 #2C1E16;
 }
-body.big-screen h1, body.big-screen h2, body.big-screen h3 { 
-  margin-top: 0; 
-  color: #C0392B; 
+body.big-screen h1, body.big-screen h2, body.big-screen h3 {
+  margin-top: 0;
+  color: #C0392B;
   text-transform: uppercase;
 }
+body.big-screen h1 { font-size: 5vh; line-height: 1.1; margin-bottom: 1.5vh; }
+body.big-screen .heat-header h1 { margin-bottom: 1.5vh; }
+body.big-screen .card { padding: 1vh 1vw; margin-bottom: 1.5vh; font-size: 2.6vh; }
 
-body.big-screen .standings-table { 
-  font-size: calc(55vh / var(--player-count, 15)); 
-  line-height: 1.1; 
+/* Standings: rows share the height left under the title; capped by width so names fit the column */
+body.big-screen .standings-table {
+  table-layout: fixed;
+  font-size: min(calc((100vh - 14vh) / (var(--player-count, 10) * 1.4 + 1)), 3.2vw);
+  line-height: 1.1;
 }
-body.big-screen .standings-table th { 
-  background: #2980B9; 
-  color: #FFF; 
+body.big-screen .standings-table th {
+  background: #2980B9;
+  color: #FFF;
   text-transform: uppercase;
   border-bottom: 3px solid #2C1E16;
+  font-size: 0.6em;
+  white-space: nowrap;
 }
-body.big-screen .standings-table td { 
-  border-bottom: 2px solid #E67E22; 
+body.big-screen .standings-table th:nth-child(1) { width: 14%; }
+body.big-screen .standings-table th:nth-child(3),
+body.big-screen .standings-table th:nth-child(4) { width: 18%; }
+body.big-screen .standings-table td {
+  border-bottom: 2px solid #E67E22;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-body.big-screen .standings-table th, 
+body.big-screen .standings-table th,
 body.big-screen .standings-table td { padding: 0.1em 0.3em; }
 
+/* Lobbies: --pod-cols / --pod-rows are set by renderHeat. A 4-player card is ~7.5em tall. */
 body.big-screen .pods-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  font-size: calc(50vh / var(--player-count, 15));
+  grid-template-columns: repeat(var(--pod-cols, 2), minmax(0, 1fr));
+  gap: 2vh 1.5vw;
+  font-size: min(
+    calc((100vh - 17vh - (var(--pod-rows, 2) - 1) * 2vh) / (var(--pod-rows, 2) * 7.5)),
+    var(--pod-max-font, 2.6vw)
+  );
 }
+body.big-screen .pods-container.single { --pod-max-font: 4vw; }
+body.big-screen .pod-card { padding: 0.4em 0.6em; }
+body.big-screen .pod-card h3 { font-size: 1em; margin: 0 0 0.3em; }
+body.big-screen .pod-row { font-size: 1em; margin-bottom: 0.2em; gap: 0.4em; }
+body.big-screen .player-name { display: flex; align-items: center; min-width: 0; }
+body.big-screen .name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.big-screen .host-badge { flex-shrink: 0; }
+body.big-screen #final-pod-container .pod-card { font-size: min(4.5vh, 3vw); }
 
-body.big-screen .hide-on-big, 
+body.big-screen .hide-on-big,
 body.big-screen .admin-only,
-body.big-screen button { 
-  display: none !important; 
+body.big-screen button {
+  display: none !important;
 }
 
+/* Darker accents than the admin view: a dim projector washes out light green/orange on white */
 .big-screen-only { display: none; }
-body.big-screen .big-screen-only { display: inline; font-weight: bold; color: #27AE60; }
-body.big-screen .host-badge { color: #F39C12; font-size: 0.8em; margin-left: 5px; }
+body.big-screen .big-screen-only { display: inline; font-weight: bold; color: #1E7B45; flex-shrink: 0; }
+body.big-screen .champion-banner {
+  background: #FFF; color: #C0392B; border: 4px solid #D35400; box-shadow: 4px 4px 0 #2C1E16;
+  font-size: min(6vh, 4vw); padding: 1.5vh 1vw; margin-bottom: 2vh;
+}
+body.big-screen .champion-sub { font-size: 0.4em; }
+body.big-screen .host-badge {
+  background: #D35400; color: #FFF; font-size: 0.55em; padding: 0.1em 0.4em;
+  border-radius: 4px; margin-left: 0.3em; vertical-align: middle;
+}
