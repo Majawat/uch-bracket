@@ -8,6 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('storage', (e) => {
   if (e.key === 'uch_lan_state') {
     UCH.State.load();
-    UCH.UI.init();
+    UCH.UI.refresh();
   }
 });
