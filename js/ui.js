@@ -339,14 +339,20 @@ window.UCH.UI = (function() {
         const hostBadge = pNum === 0 ? '<span class="host-badge">HOST</span>' : '';
 
         html += `<div class="pod-row">
-          <span>${esc(player)} ${hostBadge}</span>
+          <span class="player-name"><span class="name-text">${esc(player)}</span> ${hostBadge}</span>
           <select class="admin-only" data-player="${esc(player)}" onchange="UCH.UI.liveUpdateHeat(this.dataset.player, this.value)" ${disabled}>${options}</select>
           <span class="big-screen-only">${displayVal}</span>
         </div>`;
       });
       html += `</div>`;
     });
-    document.getElementById('heat-pods').innerHTML = html;
+    const podsEl = document.getElementById('heat-pods');
+    podsEl.innerHTML = html;
+    // Big screen sizing hints (see .pods-container in style.css)
+    const cols = heat.pods.length === 1 ? 1 : 2;
+    podsEl.style.setProperty('--pod-cols', cols);
+    podsEl.style.setProperty('--pod-rows', Math.ceil(heat.pods.length / cols));
+    podsEl.classList.toggle('single', cols === 1);
 
     document.getElementById('heat-sitouts').innerHTML = heat.sitOuts.length ?
       `<div class="card warning">Sitting out this heat: <strong>${heat.sitOuts.map(esc).join(', ')}</strong> (Auto-awarded ${state.settings.sitOutPoints} pts)</div>` : '';
@@ -466,7 +472,7 @@ window.UCH.UI = (function() {
       const hostBadge = pNum === 0 ? '<span class="host-badge">HOST</span>' : '';
 
       html += `<div class="pod-row">
-        <span>${esc(player)} ${hostBadge}</span>
+        <span class="player-name"><span class="name-text">${esc(player)}</span> ${hostBadge}</span>
         <select class="admin-only" data-player="${esc(player)}" onchange="UCH.UI.liveUpdateFinal(this.dataset.player, this.value)" ${disabled}>${options}</select>
         <span class="big-screen-only">${displayVal}</span>
       </div>`;
